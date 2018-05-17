@@ -1,5 +1,5 @@
 module.exports = {
-    'secret': "mydirtylittlesecret",
-    'database': "mongodb://localhost/eth-wallet",
+    'secret': process.env.SECRET || "mydirtylittlesecret",
+    'database': process.env.DATABASE_URI || "mongodb://localhost/eth-wallet",
     'PORT': process.env.PORT || 8080,
 }
