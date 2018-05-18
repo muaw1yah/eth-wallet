@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 // import configurations and user Model
 const config = require('../config');
 const User = require('../user/User');
+const verifyToken = require('./VerifyToken');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
@@ -28,7 +29,6 @@ router.post('/register', (req, res) => {
 
     User.create(payload, (err, user) => {
         if (err) {
-            console.log(err);
             return res.status(500).send('error registering new user');
         }
 
@@ -41,33 +41,42 @@ router.post('/register', (req, res) => {
     });
 });
 
-router.get('/me', (req, res) => {
-    // get token from request header
-    const token = req.headers['x-access-token'];
-
-    // if token is not in the request header
-    if(!token) {
-        // send un authorized error message
-        return res.status(401).send('Un Authorized');
-    }
-
-    // check if the token send by user if valid
-    jwt.verify(token, config.secret, (err, decode) => {
-        // if token cannot be validated
-        if(err) {
-            // send error message
-            return res.status(500).send({ auth: false, message: 'authentication failed with the provided token'});
+router.post('/login', (req, res) => {
+    const params = req.body;
+    User.findOne({ email: params.email }, (err, user) => {
+        if (err) {
+            return res.status(500).send('Server cannot process your request');
+        }
+        if (!user) {
+            return res.status(401).send('Invalid Login Details');
         }
 
-        // get user from the decoded token id
-        User.findById(decode._id, (err, user) => {
-            if(err) {
-                return res.status(500).send("Cannot find user");
-            }
+        let passwordIsValid = bcrypt.compareSync(params.password, user.password);
+        if (!passwordIsValid) {
+            return res.status(401).send({ auth: false, token: null });
+        }
 
-            return res.status(200).send(user);
-        })
+        let token = jwt.sign({ id: user._id }, config.secret, {
+            expiresIn: 24 * 60 * 60
+        });
+
+        res.status(200).send({ auth: true, token: token });
     });
+});
+
+router.get('/logout', (req, res) => {
+    res.status(200).send({ auth: false, token: null });
+})
+
+router.get('/me', verifyToken, (req, res, next) => {
+    // get user from the decoded token id
+    User.findById(req.userId, (err, user) => {
+        if (err) {
+            return res.status(500).send("Cannot find user");
+        }
+
+        return res.status(200).send(user);
+    })
 });
 
 module.exports = router;
