@@ -8,5 +8,8 @@ app.use('/users', UserController);
 const AuthController = require('./auth/AuthController');
 app.use('/auth', AuthController);
 
+const WalletController = require('./auth/WalletController');
+app.use('/wallet', WalletController);
+
 
 module.exports = app;
