@@ -1,6 +1,12 @@
-var app = require('./app');
-var port = process.env.PORT || 3000;
+const morgan = require('morgan');
+const app = require('./app');
+const config = require('./config');
 
-var server = app.listen(port, function() {
+var port = config.PORT;
+
+// log requests to console using morgan
+app.use(morgan('dev'));
+
+var server = app.listen(port, () => {
   console.log('Express server listening on port ' + port);
 });
