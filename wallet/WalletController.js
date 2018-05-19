@@ -12,7 +12,7 @@ const keyStore = require('eth-lightwallet').keystore;
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-var web3 = new Web3(config.infura_ropsten);
+var web3 = new Web3(config.ropsten);
 
 // CREATES A NEW USER
 router.post('/', (req, res, next) => {

@@ -1,10 +1,10 @@
 module.exports = {
-    'secret': process.env.SECRET || "mydirtylittlesecret",
-    'password': process.env.SECRET || "hithereigotyoumyfinefineloveyeah",
-    'database': process.env.DATABASE_URI || "mongodb://localhost/ethwallet5",
+    'secret': process.env.SECRET,
+    'password': process.env.PASSWORD,
+    'database': process.env.DATABASE_URI,
     'PORT': process.env.PORT || 8080,
-    'infura_ropsten': 'https://ropsten.infura.io/itRXy2X4KtzI7YZTq9wL',
-    'infura_rinkeby': 'https://rinkeby.infura.io/itRXy2X4KtzI7YZTq9wL',
-    'infura_kovan': 'https://kovan.infura.io/itRXy2X4KtzI7YZTq9wL',
-    'infura_mainnet': 'https://mainnet.infura.io/itRXy2X4KtzI7YZTq9wL'
+    'ropsten': process.env.ROPSTEN_URL,
+    'rinkeby': process.env.RINSKEBY_URL,
+    'kovan': process.env.KOVAN_URI,
+    'mainnet': process.env.MAINNET_URI
 }
