@@ -1,54 +1,56 @@
-var express = require('express');
-var router = express.Router();
-var bodyParser = require('body-parser');
+const express = require('express');
+const router = express.Router();
+const bodyParser = require('body-parser');
+const Web3 = require('web3');
+const jwt = require('jsonwebtoken');
+
+const User = require('../user/User');
+const verifyToken = require('../auth/VerifyToken');
+const config = require('../config');
+const keyStore = require('eth-lightwallet').keystore;
 
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
-var User = require('./User');
+
+var web3 = new Web3(config.infura_ropsten);
 
 // CREATES A NEW USER
-router.post('/', function (req, res) {
-    User.create({
-            username : req.body.username,
-            email : req.body.email,
-            password : req.body.password
-        }, 
-        function (err, user) {
-            if (err) return res.status(500).send("There was a problem adding the information to the database.");
-            res.status(200).send(user);
+router.post('/', (req, res, next) => {
+    var account = web3.eth.accounts.create();
+
+    var wallet = {
+        publicAddress: account.address,
+        privateKey: account.privateKey,
+        created_at: new Date()
+    }
+
+    // get token from request header
+    const token = req.headers['x-access-token'];
+
+    // if token is not in the request header
+    if (!token) {
+        // return wallet to the client
+        return res.status(200).send(wallet);
+    }
+
+    // check if the token send by user is valid
+    jwt.verify(token, config.secret, (err, decode) => {
+        // if token cannot be validated
+        if (err) {
+            // send error message
+            return res.status(500).send({ auth: false, message: 'authentication failed with the provided token' });
+        }
+        
+        User.findOneAndUpdate(
+            {_id: decode.id},
+            { $push: { wallets: wallet  } },
+            (err, user) => {
+            if(err) {
+                return res.status(403).send('cannot find user');
+            }
+
+            return res.status(200).send(wallet);
         });
-});
-
-// RETURNS ALL THE USERS IN THE DATABASE
-router.get('/', function (req, res) {
-    User.find({}, function (err, users) {
-        if (err) return res.status(500).send("There was a problem finding the users.");
-        res.status(200).send(users);
-    });
-});
-
-// GETS A SINGLE USER FROM THE DATABASE
-router.get('/:id', function (req, res) {
-    User.findById(req.params.id, function (err, user) {
-        if (err) return res.status(500).send("There was a problem finding the user.");
-        if (!user) return res.status(404).send("No user found.");
-        res.status(200).send(user);
-    });
-});
-
-// DELETES A USER FROM THE DATABASE
-router.delete('/:id', function (req, res) {
-    User.findByIdAndRemove(req.params.id, function (err, user) {
-        if (err) return res.status(500).send("There was a problem deleting the user.");
-        res.status(200).send("User: "+ user.username +" was deleted.");
-    });
-});
-
-// UPDATES A SINGLE USER IN THE DATABASE
-router.put('/:id', function (req, res) {
-    User.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
-        if (err) return res.status(500).send("There was a problem updating the user.");
-        res.status(200).send(user);
     });
 });
 

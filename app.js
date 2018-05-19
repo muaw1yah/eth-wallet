@@ -8,7 +8,7 @@ app.use('/users', UserController);
 const AuthController = require('./auth/AuthController');
 app.use('/auth', AuthController);
 
-const WalletController = require('./auth/WalletController');
+const WalletController = require('./wallet/WalletController');
 app.use('/wallet', WalletController);
 
 

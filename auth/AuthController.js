@@ -22,12 +22,12 @@ router.post('/register', (req, res) => {
     const params = req.body;
     const hashedPassword = bcrypt.hashSync(params.password, 10);
     const payload = {
-        name: params.name,
-        email: params.email,
+        username: params.username,
         password: hashedPassword
     }
 
     User.create(payload, (err, user) => {
+        console.log(err);
         if (err) {
             return res.status(500).send('error registering new user');
         }

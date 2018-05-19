@@ -6,7 +6,7 @@ var UserSchema = new mongoose.Schema({
   phone: String,
   location: String,
   wallets: [{
-    publicAddress: { type: String, required: true, unique: true },
+    address: { type: String, required: true },
     privateKey: { type: String, required: true },
     created_at: Date,
   }],
@@ -15,7 +15,7 @@ var UserSchema = new mongoose.Schema({
 });
 
 // on every save, add the date
-userSchema.pre('save', function(next) {
+UserSchema.pre('save', function(next) {
   // get the current date
   var currentDate = new Date();
 
